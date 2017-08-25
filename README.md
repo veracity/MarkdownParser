@@ -5,9 +5,9 @@ If any files found, MarkdownParser produces JSON fo reach, containing parsed HTM
 JSON files are at the end put into blob for further operations.
 
 ### NuGet Packages used:
-+[Markdig](https://github.com/lunet-io/markdig)
-+[Markdig Syntax Highlighting](https://github.com/RichardSlater/Markdig.SyntaxHighlighting)
-+[Octokit](https://github.com/octokit/octokit.net)
++ [Markdig](https://github.com/lunet-io/markdig)
++ [Markdig Syntax Highlighting](https://github.com/RichardSlater/Markdig.SyntaxHighlighting)
++ [Octokit](https://github.com/octokit/octokit.net)
 
 ### Useful articles:
 JSON schema from GitHub Webhook:
