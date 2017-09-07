@@ -73,13 +73,9 @@ namespace MarkdownParserTests
             using (var reader = new StreamReader(pathToMd, Encoding.UTF8))
                 result = parser.PrepareMarkdownData(reader.ReadToEnd());
 
-
-            Assert.AreEqual(1, result.HeaderData.Count);
-            Assert.IsNull(result.HeaderData[0].Id);
-            Assert.AreEqual(5, result.HeaderData[0].Children.Count);
-            Assert.AreEqual("active-directory-b2c-wordpress-plugin-openidconnect", result.HeaderData[0].Children[0].Id);
-            Assert.AreEqual(0, result.HeaderData[0].Children[0].Children.Count);
-            Assert.AreEqual("more-information", result.HeaderData[0].Children[4].Id);
+            Assert.AreEqual(3, result.HeaderData.Count);
+            Assert.AreEqual("overview", result.HeaderData[0].Id);
+            Assert.AreEqual(0, result.HeaderData[0].Children.Count);
         }
 
         [Test, Ignore("Used to parse few file from local drive")]
