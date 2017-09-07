@@ -21,5 +21,3 @@ https://docs.microsoft.com/en-us/azure/azure-functions/
 Azure Functions Imperative bindings reference:
 
 https://docs.microsoft.com/en-us/azure/azure-functions/functions-reference-csharp#imperative-bindings
-
-
