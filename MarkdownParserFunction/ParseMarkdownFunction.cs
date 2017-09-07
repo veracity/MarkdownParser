@@ -3,10 +3,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.Http;
+using System.Reflection;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Host;
 using Microsoft.WindowsAzure.Storage.Blob;
+using Binder = Microsoft.Azure.WebJobs.Binder;
 
 namespace MarkdownParserFunction
 {
@@ -32,11 +35,30 @@ namespace MarkdownParserFunction
             Binder binder, TraceWriter log)
         {
             log.Info("C# HTTP trigger function processed a request.");
-            dynamic data = await req.Content.ReadAsAsync<object>();
-            var result = await ProcessCommitAsync(data, binder, log);
-            return result
-                ? req.CreateResponse(HttpStatusCode.OK)
-                : req.CreateErrorResponse(HttpStatusCode.NoContent, "error.");
+            try
+            {
+                dynamic data = await req.Content.ReadAsAsync<object>();
+                var result = await ProcessCommitAsync(data, binder, log);
+                return result
+                    ? req.CreateResponse(HttpStatusCode.OK)
+                    : req.CreateErrorResponse(HttpStatusCode.NoContent, "error.");
+            }
+            catch (ReflectionTypeLoadException ex)
+            {
+                var sb = new StringBuilder();
+                foreach (var exSub in ex.LoaderExceptions)
+                {
+                    sb.AppendLine(exSub.Message);
+                    var exFileNotFound = exSub as FileNotFoundException;
+                    if (!string.IsNullOrEmpty(exFileNotFound?.FusionLog))
+                    {
+                        sb.AppendLine("Fusion Log:");
+                        sb.AppendLine(exFileNotFound.FusionLog);
+                    }
+                    sb.AppendLine();
+                }
+                return req.CreateErrorResponse(HttpStatusCode.NoContent, sb.ToString());
+            }
         }
         /// <summary>
         /// Get all necessary info from GitHub json message
