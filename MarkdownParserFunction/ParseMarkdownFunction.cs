@@ -176,9 +176,10 @@ namespace MarkdownParserFunction
                     }
                     else
                     {
-                        using (var writer =
-                            await binder.BindAsync<TextWriter>(new BlobAttribute($"json-container/{json.Item1}")))
-                            writer.Write(json.Item2);
+                        var blob =
+                            await binder.BindAsync<CloudBlockBlob>(new BlobAttribute($"json-container/{json.Item1}"));
+                        blob.Properties.ContentType = "application/json; charset=utf-8";
+                        blob.UploadText(json.Item2, Encoding.UTF8);
                     }
                 }
                 return true;
