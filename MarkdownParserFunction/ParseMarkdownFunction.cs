@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Reflection;
@@ -9,6 +10,7 @@ using System.Threading.Tasks;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Host;
 using Microsoft.WindowsAzure.Storage.Blob;
+using Octokit;
 using Binder = Microsoft.Azure.WebJobs.Binder;
 
 namespace MarkdownParserFunction
@@ -72,8 +74,12 @@ namespace MarkdownParserFunction
         {
             var repositoryId = (long) data.repository.id;
             var branch = (string) data.repository.default_branch;
-            var commitId = (string) data.head_commit.id;
-            var mdFiles = await GetAllMdFilesTask("MarkdownParser", repositoryId, branch, commitId, log);
+            var commits = new List<string>();
+            foreach (var commit in data.commits)
+                commits.Add(commit.id);
+
+            commits.Add(data.head_commit.id);
+            var mdFiles = await GetAllMdFilesTask("MarkdownParser", repositoryId, branch, commits, log);
             var jsonFiles = PrepareJsonData(mdFiles, log);
             return await WriteJsonFilesToBlobsTask(jsonFiles, binder, log);
         }
@@ -83,19 +89,26 @@ namespace MarkdownParserFunction
         /// <param name="appName">Needed by GitHubClient, application name</param>
         /// <param name="repositoryId">Repository where current commit happened</param>
         /// <param name="branchName">Name of the branch of current commit</param>
-        /// <param name="commitId">Id of current commit</param>
+        /// <param name="commitIds">Id of current commits</param>
         /// <param name="log">TraceWriter for logging failures if happen</param>
         /// <returns>List of tuple with two strings. First string is the name of file, second - content</returns>
         public static async Task<List<Tuple<string, string>>> GetAllMdFilesTask(string appName, long repositoryId,
-            string branchName, string commitId, TraceWriter log)
+            string branchName, List<string> commitIds, TraceWriter log)
         {
             var mdFiles = new List<Tuple<string, string>>();
             try
             {
-                var github = new Octokit.GitHubClient(new Octokit.ProductHeaderValue(appName));
-                var commit = await github.Repository.Commit.Get(repositoryId, commitId);
-                foreach (var file in commit.Files)
+                var github = new GitHubClient(new ProductHeaderValue(appName));
+                var files = new List<GitHubCommitFile>();
+                foreach (var id in commitIds)
                 {
+                    var commit = await github.Repository.Commit.Get(repositoryId, id);
+                    files.AddRange(commit.Files.ToList());
+                }
+                foreach (var file in files)
+                {
+                    if (mdFiles.FirstOrDefault(m => m.Item1.Equals(Path.GetFileNameWithoutExtension(file.Filename))) != null)
+                        continue;
                     var ext = Path.GetExtension(file.Filename);
                     if (ext != null && ext.Equals(".md"))
                     {
