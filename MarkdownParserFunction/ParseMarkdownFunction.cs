@@ -76,9 +76,9 @@ namespace MarkdownParserFunction
             var branch = (string) data.repository.default_branch;
             var commits = new List<string>();
             foreach (var commit in data.commits)
-                commits.Add(commit.id);
+                commits.Add(commit.id.ToString());
 
-            commits.Add(data.head_commit.id);
+            commits.Add(data.head_commit.id.ToString());
             var mdFiles = await GetAllMdFilesTask("MarkdownParser", repositoryId, branch, commits, log);
             var jsonFiles = PrepareJsonData(mdFiles, log);
             return await WriteJsonFilesToBlobsTask(jsonFiles, binder, log);
