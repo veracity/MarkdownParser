@@ -4,7 +4,6 @@ using System.Linq;
 using Markdig;
 using Markdig.Renderers.Html;
 using Markdig.Syntax;
-using Markdig.SyntaxHighlighting;
 using Newtonsoft.Json;
 
 namespace MarkdownParser
@@ -37,9 +36,7 @@ namespace MarkdownParser
             using (var writer = new StringWriter())
             {
                 var builder = new MarkdownPipelineBuilder();
-                builder.UseAutoIdentifiers()
-                    .UseAdvancedExtensions()
-                    .UseSyntaxHighlighting();
+                builder.UseAutoIdentifiers();
                 document = Markdown.ToHtml(mdFileContent, writer, builder.Build());
                 htmlString = writer.ToString();
             }
