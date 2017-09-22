@@ -37,6 +37,7 @@ namespace MarkdownParser
             {
                 var builder = new MarkdownPipelineBuilder();
                 builder.UseAutoIdentifiers();
+                builder.UseFigures();
                 document = Markdown.ToHtml(mdFileContent, writer, builder.Build());
                 htmlString = writer.ToString();
             }
