@@ -72,7 +72,11 @@ namespace MarkdownParserTests
             MarkdownData result;
             using (var reader = new StreamReader(pathToMd, Encoding.UTF8))
                 result = parser.PrepareMarkdownData(reader.ReadToEnd());
-
+            Assert.True(result.HtmlString.Contains("JavaScript"));
+            Assert.True(result.HtmlString.Contains("Python"));
+            Assert.True(result.HtmlString.Contains("veracity-dev-pres-html-code"));
+            Assert.True(result.HtmlString.Contains("<strong>JavaScript</strong>"));
+            Assert.False(result.HtmlString.Contains("UNKNOWN"));
             Assert.AreEqual(3, result.HeaderData.Count);
             Assert.AreEqual("overview", result.HeaderData[0].Id);
             Assert.AreEqual(0, result.HeaderData[0].Children.Count);

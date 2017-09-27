@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using Markdig;
+using Markdig.CustomCodeBlockGenerator;
 using Markdig.Renderers.Html;
 using Markdig.Syntax;
 using Newtonsoft.Json;
@@ -38,6 +39,7 @@ namespace MarkdownParser
                 var builder = new MarkdownPipelineBuilder();
                 builder.UseAutoIdentifiers();
                 builder.UseFigures();
+                builder.UseCustomCodeBlockExtension();
                 document = Markdown.ToHtml(mdFileContent, writer, builder.Build());
                 htmlString = writer.ToString();
             }
