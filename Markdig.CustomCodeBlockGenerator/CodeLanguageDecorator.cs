@@ -14,7 +14,8 @@ namespace Markdig.CustomCodeBlockGenerator
             {"nodejs", "NodeJS"},
             {"java", "Java"},
             {"powershell", "PowerShell"},
-            {"batch", "Batch"}
+            {"batch", "Batch"},
+            {"cpp", "Cpp" }
         };
         public static string NormalizeLanguage(string language)
         {
