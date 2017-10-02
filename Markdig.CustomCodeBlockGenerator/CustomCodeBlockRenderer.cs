@@ -69,12 +69,12 @@ namespace Markdig.CustomCodeBlockGenerator
                 .WriteLine("</strong>")
                 .WriteLine("<button>Copy</button>")
                 .WriteLine("</div>")
-                .WriteLine("<pre>")
+                .Write("<pre>")
                 .Write("<code")
                 .WriteAttributes(obj)
-                .WriteLine(">")
-                .WriteLeafRawLines(obj, true, true)
-                .WriteLine("</code>")
+                .Write(">")
+                .WriteLeafRawLines(obj, false, true)
+                .Write("</code>")
                 .WriteLine("</pre>")
                 .WriteLine("</div>");
         }
