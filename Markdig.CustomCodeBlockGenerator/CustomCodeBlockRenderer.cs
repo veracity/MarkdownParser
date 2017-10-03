@@ -20,7 +20,7 @@ namespace Markdig.CustomCodeBlockGenerator
         }
 
         /* pattern:
-        <div class="veracity-dev-pres-html-code" data-lang="JavaScript">
+        <div class="veracity-dev-pres-html-code" data-lang="JavaScript" data-original-lang="javascript" data-lang-unknown="true/false">
         <div class="veracity-dev-pres-html-code-header">
         <strong>JavaScript</strong>
         <button>Copy</button>
