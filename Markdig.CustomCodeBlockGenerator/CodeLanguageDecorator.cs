@@ -15,11 +15,12 @@ namespace Markdig.CustomCodeBlockGenerator
             {"java", "Java"},
             {"powershell", "PowerShell"},
             {"batch", "Batch"},
-            {"cpp", "Cpp" }
+            {"cpp", "C++" },
+            {"md", "Markdown" }
         };
         public static string NormalizeLanguage(string language)
         {
-            return LanguageMapping.ContainsKey(language) ? LanguageMapping[language] : "UNKNOWN";
+            return LanguageMapping.ContainsKey(language) ? LanguageMapping[language] : "";
         }
     }
 }

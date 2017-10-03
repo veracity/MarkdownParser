@@ -54,7 +54,9 @@ namespace Markdig.CustomCodeBlockGenerator
                     Properties =
                         new List<KeyValuePair<string, string>>
                         {
-                            new KeyValuePair<string, string>("data-lang", languageNormalized)
+                            new KeyValuePair<string, string>("data-lang", languageNormalized),
+                            new KeyValuePair<string, string>("data-original-lang", languageMoniker),
+                            new KeyValuePair<string, string>("data-lang-unknown", string.IsNullOrEmpty(languageNormalized) ? "true": "false")
                         }
                 })
                 .WriteLine(">")
