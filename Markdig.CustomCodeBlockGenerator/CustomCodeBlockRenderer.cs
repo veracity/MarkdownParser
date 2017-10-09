@@ -20,7 +20,7 @@ namespace Markdig.CustomCodeBlockGenerator
         }
 
         /* pattern:
-        <div class="veracity-dev-pres-html-code" data-lang="JavaScript" data-original-lang="javascript" data-lang-unknown="true/false">
+        <div class="veracity-dev-pres-html-code" data-lang="language-javascript">
         <div class="veracity-dev-pres-html-code-header">
         <strong>JavaScript</strong>
         <button>Copy</button>
@@ -44,7 +44,6 @@ namespace Markdig.CustomCodeBlockGenerator
                 _underlyingRenderer.Write(renderer, obj);
                 return;
             }
-            var languageNormalized = CodeLanguageDecorator.NormalizeLanguage(languageMoniker);
 
             renderer
                 .Write("<div")
@@ -54,9 +53,7 @@ namespace Markdig.CustomCodeBlockGenerator
                     Properties =
                         new List<KeyValuePair<string, string>>
                         {
-                            new KeyValuePair<string, string>("data-lang", languageNormalized),
-                            new KeyValuePair<string, string>("data-original-lang", languageMoniker),
-                            new KeyValuePair<string, string>("data-lang-unknown", string.IsNullOrEmpty(languageNormalized) ? "true": "false")
+                            new KeyValuePair<string, string>("data-lang", $"language-{languageMoniker}")
                         }
                 })
                 .WriteLine(">")
@@ -66,9 +63,7 @@ namespace Markdig.CustomCodeBlockGenerator
                     Classes = new List<string> {"veracity-dev-pres-html-code-header"}
                 })
                 .WriteLine(">")
-                .Write("<strong>")
-                .Write(languageNormalized)
-                .WriteLine("</strong>")
+                .WriteLine("<strong></strong>")
                 .WriteLine("<button>Copy</button>")
                 .WriteLine("</div>")
                 .Write("<pre>")

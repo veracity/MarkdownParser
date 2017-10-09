@@ -43,7 +43,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CodeLanguageDecorator.cs" />
     <Compile Include="CustomCodeBlockExtension.cs" />
     <Compile Include="CustomCodeBlockExtensions.cs" />
     <Compile Include="CustomCodeBlockRenderer.cs" />
