@@ -11,6 +11,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MarkdownParserTests", "Mark
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Markdig.CustomCodeBlockGenerator", "Markdig.CustomCodeBlockGenerator\Markdig.CustomCodeBlockGenerator.csproj", "{601F96DA-96FC-411B-94A8-83FA26B1C7A4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MarkdownParserConsoleApp", "MarkdownParserConsoleApp\MarkdownParserConsoleApp.csproj", "{F6039D7E-BBCC-45A0-B755-FCAD35966664}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MarkdownParserCommon", "MarkdownParserCommon\MarkdownParserCommon.csproj", "{C77BF26B-62E3-405B-80E5-04065CB748B7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +37,14 @@ Global
 		{601F96DA-96FC-411B-94A8-83FA26B1C7A4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{601F96DA-96FC-411B-94A8-83FA26B1C7A4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{601F96DA-96FC-411B-94A8-83FA26B1C7A4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F6039D7E-BBCC-45A0-B755-FCAD35966664}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F6039D7E-BBCC-45A0-B755-FCAD35966664}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F6039D7E-BBCC-45A0-B755-FCAD35966664}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F6039D7E-BBCC-45A0-B755-FCAD35966664}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C77BF26B-62E3-405B-80E5-04065CB748B7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C77BF26B-62E3-405B-80E5-04065CB748B7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C77BF26B-62E3-405B-80E5-04065CB748B7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C77BF26B-62E3-405B-80E5-04065CB748B7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

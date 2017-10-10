@@ -7,10 +7,9 @@ using System.Net.Http;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using MarkdownParserCommon;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Host;
-using Microsoft.WindowsAzure.Storage;
-using Microsoft.WindowsAzure.Storage.Blob;
 using Octokit;
 using Binder = Microsoft.Azure.WebJobs.Binder;
 
@@ -63,6 +62,7 @@ namespace MarkdownParserFunction
                 return req.CreateErrorResponse(HttpStatusCode.NoContent, sb.ToString());
             }
         }
+
         /// <summary>
         /// Get all necessary info from GitHub json message
         /// Perform function operations.
@@ -82,9 +82,11 @@ namespace MarkdownParserFunction
             commits.Add(data.head_commit.id.ToString());
             var mdFiles = await GetAllMdFilesTask("MarkdownParser", repositoryId, branch, commits, log);
             var jsonFiles = PrepareJsonData(mdFiles, log);
-            //return await WriteJsonFilesToBlobsTask(jsonFiles, binder, log);
-            return await WriteJsonFilesToFileShareTask(jsonFiles, log);
+            return await Utilities.WriteJsonFilesToFileShareTask(jsonFiles,
+                Utilities.GetEnvironmentVariable("AzureWebJobsStorage"),
+                Utilities.GetEnvironmentVariable("OutputFileShareName"), log);
         }
+
         /// <summary>
         /// Use Octokit to connect to GitHub and retrieve information about current commit.
         /// </summary>
@@ -109,13 +111,14 @@ namespace MarkdownParserFunction
                 }
                 foreach (var file in files)
                 {
-                    if (mdFiles.FirstOrDefault(m => m.Item1.Equals(Path.GetFileNameWithoutExtension(file.Filename))) != null)
+                    if (mdFiles.FirstOrDefault(m => m.Item1.Equals(Path.GetFileNameWithoutExtension(file.Filename))) !=
+                        null)
                         continue;
                     var ext = Path.GetExtension(file.Filename);
                     if (ext != null && ext.Equals(".md"))
                     {
                         // when status == "removed" there is no file available and GetAllContentsByRef throws exception
-                        if (file.Status == "modified" || file.Status == "added") 
+                        if (file.Status == "modified" || file.Status == "added")
                         {
                             var contents =
                                 await github.Repository.Content.GetAllContentsByRef(repositoryId, file.Filename,
@@ -164,93 +167,6 @@ namespace MarkdownParserFunction
                 return new List<Tuple<string, string>>();
             }
             return jsonList;
-        }
-        /// <summary>
-        /// Based on input list of tuples creates blob for each.
-        /// Name of the blob is first string in tuple, content of blob is second string in tuple
-        /// Imperative bindings used here:
-        /// https://docs.microsoft.com/en-us/azure/azure-functions/functions-reference-csharp#imperative-bindings
-        /// </summary>
-        /// <param name="jsonData">list of tuples with json data, item1-fileName, item2-json content</param>
-        /// <param name="binder">Binder used for imperative bindings</param>
-        /// <param name="log">traceWriter for logging exceptions</param>
-        /// <returns>true if success, false otherwise</returns>
-        public static async Task<bool> WriteJsonFilesToBlobsTask(List<Tuple<string, string>> jsonData, Binder binder,
-            TraceWriter log)
-        {
-            try
-            {
-                // by default functionapp storage account is used.
-                foreach (var json in jsonData)
-                {
-                    if (string.IsNullOrEmpty(json.Item2)) // when content is empty we should delete blob.
-                    {
-                        var blob =
-                            await binder.BindAsync<CloudBlockBlob>(new BlobAttribute($"json-container/{json.Item1}"));
-                        blob.Delete();
-                    }
-                    else
-                    {
-                        var blob =
-                            await binder.BindAsync<CloudBlockBlob>(new BlobAttribute($"json-container/{json.Item1}"));
-                        blob.Properties.ContentType = "application/json; charset=utf-8";
-                        blob.UploadText(json.Item2, Encoding.UTF8);
-                    }
-                }
-                return true;
-            }
-            catch (Exception e)
-            {
-                log.Info("There was an exception thrown during writing json files to blobs: " + e.Message);
-                return false;
-            }
-        }
-
-        /// <summary>
-        /// Based on input list of tuples creates file for each.
-        /// Name of the file is first string in tuple, content of file is second string in tuple
-        /// </summary>
-        /// <param name="jsonData">list of tuples with json data, item1-fileName, item2-json content</param>
-        /// <param name="log">traceWriter for logging exceptions</param>
-        /// <returns>true if success, false otherwise</returns>
-        public static async Task<bool> WriteJsonFilesToFileShareTask(List<Tuple<string, string>> jsonData,
-            TraceWriter log)
-        {
-            try
-            {
-                // by default functionapp storage account is used.
-                var storageAccount = CloudStorageAccount.Parse(GetEnvironmentVariable("AzureWebJobsStorage"));
-                var fileClient = storageAccount.CreateCloudFileClient();
-                var share = fileClient.GetShareReference(GetEnvironmentVariable("OutputFileShareName"));
-
-                foreach (var json in jsonData)
-                {
-                    var sourceFile = share.GetRootDirectoryReference().GetFileReference(json.Item1);
-                    if (string.IsNullOrEmpty(json.Item2)) // when content is empty we should delete blob.
-                    {
-                        if (sourceFile.Exists())
-                            await sourceFile.DeleteAsync();
-                    }
-                    else
-                    {
-                        sourceFile.Properties.ContentType = "application/json; charset=utf-8";
-                        sourceFile.UploadText(json.Item2, Encoding.UTF8);
-                    }
-                }
-                return true;
-            }
-            catch (Exception e)
-            {
-                log.Info("There was an exception thrown during writing json files to FileShare: " + e.Message);
-                return false;
-            }
-        }
-
-        public static string GetEnvironmentVariable(string name)
-        {
-            return Environment.GetEnvironmentVariable(
-                       name, EnvironmentVariableTarget.Process
-                   );
         }
     }
 }
