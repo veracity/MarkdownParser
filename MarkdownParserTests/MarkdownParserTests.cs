@@ -49,7 +49,7 @@ namespace MarkdownParserTests
             Assert.IsNull(result.HeaderData[0].Children[0].Children[0].Children[0].Children[0].Id);
             Assert.AreEqual("sub-sub-header6", result.HeaderData[0].Children[0].Children[0].Children[0].Children[0].Children[0].Id);
             Assert.NotNull(result.MetaData);
-            Assert.True(result.MetaData.Count == 0);
+            Assert.True(result.MetaData.Count == 3);
         }
         [Test]
         public void TestParseMarkdownDataWithContent()
@@ -68,7 +68,7 @@ namespace MarkdownParserTests
             Assert.AreEqual(0, result.HeaderData[0].Children[0].Children.Count);
             Assert.AreEqual("more-information", result.HeaderData[0].Children[4].Id);
             Assert.NotNull(result.MetaData);
-            Assert.True(result.MetaData.Count == 0);
+            Assert.True(result.MetaData.Count == 3);
         }
 
         [Test]
@@ -90,7 +90,7 @@ namespace MarkdownParserTests
             Assert.AreEqual("overview", result.HeaderData[0].Id);
             Assert.AreEqual(0, result.HeaderData[0].Children.Count);
             Assert.NotNull(result.MetaData);
-            Assert.True(result.MetaData.Count == 0);
+            Assert.True(result.MetaData.Count == 3);
         }
 
         [Test, Ignore("Used to parse few file from local drive")]
