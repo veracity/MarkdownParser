@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using MarkdownParserCommon;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Host;
+using Microsoft.WindowsAzure.Storage.Blob;
 using Octokit;
 using Binder = Microsoft.Azure.WebJobs.Binder;
 
@@ -82,9 +83,17 @@ namespace MarkdownParserFunction
             commits.Add(data.head_commit.id.ToString());
             var mdFiles = await GetAllMdFilesTask("MarkdownParser", repositoryId, branch, commits, log);
             var jsonFiles = PrepareJsonData(mdFiles, log);
-            return await Utilities.WriteJsonFilesToFileShareTask(jsonFiles,
-                Utilities.GetEnvironmentVariable("AzureWebJobsStorage"),
-                Utilities.GetEnvironmentVariable("OutputFileShareName"), log);
+            try
+            {
+                return await Utilities.WriteJsonFilesToFileShareTask(jsonFiles,
+                    Utilities.GetEnvironmentVariable("AzureWebJobsStorage"),
+                    Utilities.GetEnvironmentVariable("OutputFileShareName"));
+            }
+            catch (Exception e)
+            {
+                log.Info("There was an exception thrown during writing json files to FileShare: " + e.Message);
+                return false;
+            }
         }
 
         /// <summary>
@@ -167,6 +176,46 @@ namespace MarkdownParserFunction
                 return new List<Tuple<string, string>>();
             }
             return jsonList;
+        }
+        /// <summary>
+        /// Based on input list of tuples creates blob for each.
+        /// Name of the blob is first string in tuple, content of blob is second string in tuple
+        /// Imperative bindings used here:
+        /// https://docs.microsoft.com/en-us/azure/azure-functions/functions-reference-csharp#imperative-bindings
+        /// </summary>
+        /// <param name="jsonData">list of tuples with json data, item1-fileName, item2-json content</param>
+        /// <param name="binder">Binder used for imperative bindings</param>
+        /// <param name="log">traceWriter for logging exceptions</param>
+        /// <returns>true if success, false otherwise</returns>
+        public static async Task<bool> WriteJsonFilesToBlobsTask(List<Tuple<string, string>> jsonData, Binder binder,
+            TraceWriter log)
+        {
+            try
+            {
+                // by default functionapp storage account is used.
+                foreach (var json in jsonData)
+                {
+                    if (string.IsNullOrEmpty(json.Item2)) // when content is empty we should delete blob.
+                    {
+                        var blob =
+                            await binder.BindAsync<CloudBlockBlob>(new BlobAttribute($"json-container/{json.Item1}"));
+                        blob.Delete();
+                    }
+                    else
+                    {
+                        var blob =
+                            await binder.BindAsync<CloudBlockBlob>(new BlobAttribute($"json-container/{json.Item1}"));
+                        blob.Properties.ContentType = "application/json; charset=utf-8";
+                        blob.UploadText(json.Item2, Encoding.UTF8);
+                    }
+                }
+                return true;
+            }
+            catch (Exception e)
+            {
+                log.Info("There was an exception thrown during writing json files to blobs: " + e.Message);
+                return false;
+            }
         }
     }
 }

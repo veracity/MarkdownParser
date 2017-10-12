@@ -30,12 +30,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Microsoft.Azure.WebJobs">
-      <HintPath>..\..\..\..\.nuget\packages\microsoft.azure.webjobs.core\2.1.0-beta4\lib\net45\Microsoft.Azure.WebJobs.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.Azure.WebJobs.Host">
-      <HintPath>..\..\..\..\.nuget\packages\microsoft.azure.webjobs\2.1.0-beta4\lib\net45\Microsoft.Azure.WebJobs.Host.dll</HintPath>
-    </Reference>
     <Reference Include="Microsoft.WindowsAzure.Storage, Version=7.2.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\.nuget\packages\windowsazure.storage\7.2.1\lib\net40\Microsoft.WindowsAzure.Storage.dll</HintPath>

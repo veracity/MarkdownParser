@@ -46,11 +46,33 @@ namespace MarkdownParser
             }
             var head = new HeaderData { Level = 0 };
             CreateTree(document.Descendants<HeadingBlock>().ToList(), head);
+            var metadata = CreateMetaData(document.Descendants<HeadingBlock>());
             return new MarkdownData
             {
                 HtmlString = htmlString,
-                HeaderData = Compress(head.Children)
+                HeaderData = Compress(head.Children),
+                MetaData = metadata
             };
+        }
+
+        private Dictionary<string, string> CreateMetaData(IEnumerable<HeadingBlock> headingBlocks)
+        {
+            var pairs = new Dictionary<string, string>();
+            var frontMatter = headingBlocks.FirstOrDefault(h => h.HeaderChar != '#');
+            if (frontMatter == null) return pairs;
+            var frontMatterArray = frontMatter.Inline.FirstChild.ToString().Split('\n');
+            foreach (var item in frontMatterArray)
+            {
+                var pair = item.Split(':');
+                if (pair.Length == 2)
+                {
+                    var key = pair[0].Trim().Trim('"');
+                    var value = pair[1].Trim().Trim('"');
+                    if (!pairs.ContainsKey(key))
+                        pairs.Add(key, value);
+                }
+            }
+            return pairs;
         }
         /// <summary>
         /// Create tree structure from non tree structure Markdown document based on order.
@@ -63,6 +85,7 @@ namespace MarkdownParser
             foreach (var block in headingBlocks)
             {
                 if (currentHeader == null) break;
+                if (block.HeaderChar != '#') continue; // frontmatter is heading block but not starting with #. Ignore here.
                 var diff = block.Level - currentHeader.Level;
                 // next item can belong to one of the parents if level diff is negative.
                 // here find proper parent
@@ -137,7 +160,14 @@ namespace MarkdownParser
         /// <returns>json string</returns>
         private string ConvertToJson(MarkdownData data)
         {
-            return JsonConvert.SerializeObject(data, Formatting.Indented, new JsonSerializerSettings
+            var dict = new Dictionary<string, object>
+            {
+                {"HtmlString", data.HtmlString},
+                {"HeaderData", data.HeaderData}
+            };
+            foreach(var item in data.MetaData)
+                dict.Add(item.Key, item.Value);
+            return JsonConvert.SerializeObject(dict, Formatting.Indented, new JsonSerializerSettings
             {
                 ReferenceLoopHandling = ReferenceLoopHandling.Serialize,
                 PreserveReferencesHandling = PreserveReferencesHandling.None
@@ -149,12 +179,9 @@ namespace MarkdownParser
     /// </summary>
     public class MarkdownData
     {
-        /// <summary>
-        /// TODO: Find where from take the title. For now leave it empty
-        /// </summary>
-        public string Title { get; set; } = string.Empty;
         public string HtmlString { get; set; }
         public List<Header> HeaderData { get; set; }
+        public Dictionary<string, string> MetaData { get; set; }
     }
     /// <summary>
     /// For JSON serialization, cheaper version of HeaderData
