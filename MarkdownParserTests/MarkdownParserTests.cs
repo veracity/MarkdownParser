@@ -26,8 +26,10 @@ namespace MarkdownParserTests
             Assert.IsNull(result.HeaderData[0].Children[4].Children[0].Children[0].Children[0].Id);
             Assert.AreEqual("sub-sub-header6", result.HeaderData[0].Children[4].Children[0].Children[0].Children[0].Children[0].Id);
             Assert.NotNull(result.MetaData);
-            Assert.True(result.MetaData.Count ==2);
+            Assert.True(result.MetaData.Count ==4);
             Assert.AreEqual("myTitle", result.MetaData["Title"]);
+            Assert.True(result.MetaData.ContainsKey("Author"));
+            Assert.True(result.MetaData.ContainsKey("Published"));
         }
         [Test]
         public void TestParseMarkdownData2()

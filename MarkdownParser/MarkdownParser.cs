@@ -46,7 +46,7 @@ namespace MarkdownParser
             }
             var head = new HeaderData { Level = 0 };
             CreateTree(document.Descendants<HeadingBlock>().ToList(), head);
-            var metadata = CreateMetaData(document.Descendants<HeadingBlock>());
+            var metadata = ValidateMetaData(CreateMetaData(document.Descendants<HeadingBlock>()));
             return new MarkdownData
             {
                 HtmlString = htmlString,
@@ -55,12 +55,18 @@ namespace MarkdownParser
             };
         }
 
+        /// <summary>
+        /// Read frontmatter of md file and create metadata information if existing.
+        /// </summary>
+        /// <param name="headingBlocks">If frontmatter exists its one of heading blocks</param>
+        /// <returns>collection of pairs key:value from frontmatter</returns>
         private Dictionary<string, string> CreateMetaData(IEnumerable<HeadingBlock> headingBlocks)
         {
             var pairs = new Dictionary<string, string>();
-            var frontMatter = headingBlocks.FirstOrDefault(h => h.HeaderChar != '#');
+            var frontMatter = headingBlocks.FirstOrDefault(h => h.HeaderChar != '#'); // frontmatter doesnt start with #
             if (frontMatter == null) return pairs;
-            var frontMatterArray = frontMatter.Inline.FirstChild.ToString().Split('\n');
+            var frontMatterArray =
+                frontMatter.Inline.FirstChild.ToString().Split('\n'); // every key:value pair is separated with new line
             foreach (var item in frontMatterArray)
             {
                 var pair = item.Split(':');
@@ -73,6 +79,50 @@ namespace MarkdownParser
                 }
             }
             return pairs;
+        }
+        /// <summary>
+        /// Valid metadata should at least contain:
+        /// Title : string value
+        /// Author : string value
+        /// Published : ISO 8601 UTC date. 
+        /// If input pairs doesnt contain those info, it will be added by default.
+        /// All other kay:value pairs will be added after that
+        /// </summary>
+        /// <param name="pairs">collection of key:value pairs read from frontmatter</param>
+        /// <returns>validated collection of key:value pairs</returns>
+        private Dictionary<string, string> ValidateMetaData(Dictionary<string, string> pairs)
+        {
+            var validatedMetaData = new Dictionary<string, string>();
+            CheckExistence("Title", pairs, validatedMetaData);
+            CheckExistence("Author", pairs, validatedMetaData);
+            CheckExistence("Published", pairs, validatedMetaData);
+            foreach(var pair in pairs)
+                validatedMetaData.Add(pair.Key, pair.Value);
+            return validatedMetaData;
+        }
+        /// <summary>
+        /// Check if key exists in pairs dictionary. If not add one with empty values to validated collection and remove from pairs
+        /// </summary>
+        /// <param name="existence">string to check</param>
+        /// <param name="pairs">collection of pairs from frontmatter</param>
+        /// <param name="validated">validated collection of key:value pairs</param>
+        private void CheckExistence(string existence, IDictionary<string, string> pairs, IDictionary<string, string> validated)
+        {
+            if (pairs.ContainsKey(existence))
+            {
+                validated.Add(existence, pairs[existence]);
+                pairs.Remove(existence);
+            }
+            else
+            {
+                if (pairs.ContainsKey(existence.ToLower()))
+                {
+                    validated.Add(existence, pairs[existence.ToLower()]);
+                    pairs.Remove(existence.ToLower());
+                }
+                else
+                    validated.Add(existence, string.Empty);
+            }    
         }
         /// <summary>
         /// Create tree structure from non tree structure Markdown document based on order.
