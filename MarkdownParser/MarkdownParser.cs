@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using Markdig;
 using Markdig.CustomCodeBlockGenerator;
+using Markdig.Extensions.Yaml;
 using Markdig.Renderers.Html;
 using Markdig.Syntax;
 using Newtonsoft.Json;
@@ -40,13 +41,14 @@ namespace MarkdownParser
                 builder.UseAutoIdentifiers();
                 builder.UsePipeTables();
                 builder.UseFigures();
+                builder.UseYamlFrontMatter();
                 builder.UseCustomCodeBlockExtension();
                 document = Markdown.ToHtml(mdFileContent, writer, builder.Build());
                 htmlString = writer.ToString();
             }
             var head = new HeaderData { Level = 0 };
             CreateTree(document.Descendants<HeadingBlock>().ToList(), head);
-            var metadata = ValidateMetaData(CreateMetaData(document.Descendants<HeadingBlock>()));
+            var metadata = ValidateMetaData(CreateMetaData(document.Descendants<YamlFrontMatterBlock>()));
             return new MarkdownData
             {
                 HtmlString = htmlString,
@@ -58,18 +60,17 @@ namespace MarkdownParser
         /// <summary>
         /// Read frontmatter of md file and create metadata information if existing.
         /// </summary>
-        /// <param name="headingBlocks">If frontmatter exists its one of heading blocks</param>
+        /// <param name="frontMatterBlocks">Frontmatter blocks collection</param>
         /// <returns>collection of pairs key:value from frontmatter</returns>
-        private Dictionary<string, string> CreateMetaData(IEnumerable<HeadingBlock> headingBlocks)
+        private Dictionary<string, string> CreateMetaData(IEnumerable<YamlFrontMatterBlock> frontMatterBlocks)
         {
             var pairs = new Dictionary<string, string>();
-            var frontMatter = headingBlocks.FirstOrDefault(h => h.HeaderChar != '#'); // frontmatter doesnt start with #
+            if (frontMatterBlocks == null) return pairs;
+            var frontMatter = frontMatterBlocks.FirstOrDefault();
             if (frontMatter == null) return pairs;
-            var frontMatterArray =
-                frontMatter.Inline.FirstChild.ToString().Split('\n'); // every key:value pair is separated with new line
-            foreach (var item in frontMatterArray)
+            foreach (var line in frontMatter.Lines.Lines)
             {
-                var pair = item.Split(':');
+                var pair = line.Slice.ToString().Split(':');
                 if (pair.Length == 2)
                 {
                     var key = pair[0].Trim().Trim('"');
@@ -135,7 +136,6 @@ namespace MarkdownParser
             foreach (var block in headingBlocks)
             {
                 if (currentHeader == null) break;
-                if (block.HeaderChar != '#') continue; // frontmatter is heading block but not starting with #. Ignore here.
                 var diff = block.Level - currentHeader.Level;
                 // next item can belong to one of the parents if level diff is negative.
                 // here find proper parent
