@@ -1,3 +1,5 @@
+[![Deploy to Azure](http://azuredeploy.net/deploybutton.png)](https://azuredeploy.net/?repository=https://github.com/veracity/MarkdownParser)
+
 ## Overview
 This repo contains the code for Markdown Parser project used to parse .md files to HTML code together with additional metadata like headers tree structure for automatic table of contents generation.
 MarkdownParserFunction is Azure Fuction, which waits for event from GitHub (Webhook) with incoming commit, filters files in commit against .md extension.
