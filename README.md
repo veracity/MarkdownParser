@@ -1,4 +1,4 @@
-[![Deploy to Azure](http://azuredeploy.net/deploybutton.png)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FVeracity%2FMarkdownParser%2Fazuredeploy.json)   <-- Most awesome Azure feature ever!
+[![Deploy to Azure](http://azuredeploy.net/deploybutton.png)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FVeracity%2FMarkdownParser%2Fmaster%2Fazuredeploy.json)   <-- Most awesome Azure feature ever!
 
 ## Overview
 This repo contains the code for Markdown Parser project used to parse .md files to HTML code together with additional metadata like headers tree structure for automatic table of contents generation.
