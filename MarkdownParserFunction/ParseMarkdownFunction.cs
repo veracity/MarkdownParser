@@ -63,7 +63,6 @@ namespace MarkdownParserFunction
                 return req.CreateErrorResponse(HttpStatusCode.NoContent, sb.ToString());
             }
         }
-
         /// <summary>
         /// Get all necessary info from GitHub json message
         /// Perform function operations.
@@ -81,7 +80,8 @@ namespace MarkdownParserFunction
                 commits.Add(commit.id.ToString());
 
             commits.Add(data.head_commit.id.ToString());
-            var mdFiles = await GetAllMdFilesTask("MarkdownParser", repositoryId, branch, commits, log);
+            var mdFiles = await GetAllMdFilesTask("MarkdownParser", repositoryId, branch, commits,
+                Utilities.GetEnvironmentVariable("AccessToken"), log);
             var jsonFiles = PrepareJsonData(mdFiles, log);
             try
             {
@@ -95,7 +95,6 @@ namespace MarkdownParserFunction
                 return false;
             }
         }
-
         /// <summary>
         /// Use Octokit to connect to GitHub and retrieve information about current commit.
         /// </summary>
@@ -103,15 +102,19 @@ namespace MarkdownParserFunction
         /// <param name="repositoryId">Repository where current commit happened</param>
         /// <param name="branchName">Name of the branch of current commit</param>
         /// <param name="commitIds">Id of current commits</param>
+        /// <param name="personalAccessToken">authentication access token</param>
         /// <param name="log">TraceWriter for logging failures if happen</param>
         /// <returns>List of tuple with two strings. First string is the name of file, second - content</returns>
         public static async Task<List<Tuple<string, string>>> GetAllMdFilesTask(string appName, long repositoryId,
-            string branchName, List<string> commitIds, TraceWriter log)
+            string branchName, List<string> commitIds, string personalAccessToken, TraceWriter log)
         {
             var mdFiles = new List<Tuple<string, string>>();
             try
             {
                 var github = new GitHubClient(new ProductHeaderValue(appName));
+                if (!string.IsNullOrEmpty(personalAccessToken))
+                    github.Connection.Credentials = new Credentials(personalAccessToken);
+                
                 var files = new List<GitHubCommitFile>();
                 foreach (var id in commitIds)
                 {
